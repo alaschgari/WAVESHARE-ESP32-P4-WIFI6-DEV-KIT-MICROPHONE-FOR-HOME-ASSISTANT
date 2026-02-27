@@ -168,5 +168,6 @@ text_sensor:
     name: "Voice Assistant State"
     id: va_state
     lambda: |-
-      return id(va).is_running() ? "Listening/Running" : "Idle/Stopped";
+      if (id(va).is_running()) return {"Listening/Running"};
+      return {"Idle/Stopped"};
     update_interval: 2s
