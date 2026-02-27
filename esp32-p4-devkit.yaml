@@ -2,8 +2,8 @@ esphome:
   name: esp32-p4-satellite
   friendly_name: "ESP32-P4 Voice Satellite"
   project:
-    name: "WAVESHARE-ESP32-P4-WIFI6-DEV-KIT-MICROPHONE-FOR-HOME-ASSISTANT"
-    version: "1.22"
+    name: "waveshare.esp32_p4_mic_ha"
+    version: "1.23"
   on_boot:
     - priority: 100.0
       then:
