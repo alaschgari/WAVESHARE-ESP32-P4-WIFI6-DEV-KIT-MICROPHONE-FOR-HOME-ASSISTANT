@@ -15,7 +15,7 @@ esp32:
 
 logger:
   hardware_uart: UART0
-  level: DEBUG
+  level: VERY_VERBOSE
   logs:
     microphone: VERY_VERBOSE
     voice_assistant: DEBUG
