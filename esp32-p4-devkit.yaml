@@ -28,7 +28,7 @@ ethernet:
   phy_addr: 1
 
 # -------------------------------------------------------------------
-# HOME ASSISTANT / API
+# HOME ASSISTANT / API & OTA
 # -------------------------------------------------------------------
 api:
   encryption:
@@ -66,7 +66,7 @@ i2s_audio:
     use_legacy: false
 
 # -------------------------------------------------------------------
-# AUDIO PIPELINE (Mixer & Resampler)
+# AUDIO PIPELINE (Mixer & Resampler für Stabilität)
 # -------------------------------------------------------------------
 speaker:
   - platform: i2s_audio
@@ -93,7 +93,7 @@ speaker:
     output_speaker: announcement_spk_mixer_input
 
 # -------------------------------------------------------------------
-# MEDIA PLAYER
+# MEDIA PLAYER & VOICE ASSISTANT
 # -------------------------------------------------------------------
 media_player:
   - platform: speaker
@@ -105,9 +105,7 @@ media_player:
       speaker: announcement_spk_resampler
     codec_support_enabled: true
 
-# -------------------------------------------------------------------
-# MIKROFON (RECORDING)
-# -------------------------------------------------------------------
+# Das Mikrofon-Objekt
 microphone:
   - platform: i2s_audio
     id: my_mic
@@ -115,6 +113,13 @@ microphone:
     i2s_din_pin: GPIO11
     adc_type: external
     pdm: false
+
+# Brücke zwischen Mikrofon und Speaker für Home Assistant Voice Assist
+voice_assistant:
+  id: va
+  microphone: my_mic
+  speaker: speaker_media_player
+  use_wake_word: true # Aktiviert die Erkennung über Home Assistant (openWakeWord)
 
 # -------------------------------------------------------------------
 # VERSTÄRKER KONTROLLE (NS4150B)
