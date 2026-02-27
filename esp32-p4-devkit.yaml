@@ -3,7 +3,7 @@ esphome:
   friendly_name: "ESP32-P4 Voice Satellite"
   project:
     name: "waveshare.esp32-p4-micro"
-    version: "1.10"
+    version: "1.11"
 
 esp32:
   board: esp32-p4-evboard
@@ -15,12 +15,12 @@ esp32:
 
 logger:
   hardware_uart: UART0
-  level: VERY_VERBOSE
+  level: DEBUG # Reduziert von VERY_VERBOSE, um Watchdog-Crash zu vermeiden
   logs:
-    microphone: VERY_VERBOSE
-    voice_assistant: VERY_VERBOSE
-    i2s_audio: VERY_VERBOSE
-    component: INFO # Zur Entlastung der CPU, nur wichtige Logs
+    voice_assistant: DEBUG
+    microphone: DEBUG
+    i2s_audio: DEBUG
+    component: INFO
 
 # -------------------------------------------------------------------
 # NETZWERK ANBINDUNG ÜBER ETHERNET (LAN)
@@ -63,22 +63,22 @@ audio_dac:
     address: 0x18
     use_mclk: True
     use_microphone: true
-    mic_gain: 42DB # Erhöht auf Maximum für besseres Signal
+    mic_gain: 42DB
     sample_rate: 16000
     bits_per_sample: 16bit
 
 # -------------------------------------------------------------------
-# I2S AUDIO BUS (Standard Belegung laut Schaltplan)
+# I2S AUDIO BUS
 # -------------------------------------------------------------------
 i2s_audio:
   - id: i2s_bus
     i2s_mclk_pin: GPIO13
     i2s_bclk_pin: GPIO12
-    i2s_lrclk_pin: GPIO10 # LRCK / Taktleitung
+    i2s_lrclk_pin: GPIO10
     use_legacy: false
 
 # -------------------------------------------------------------------
-# AUDIO PIPELINE (Mixer & Resampler)
+# AUDIO PIPELINE
 # -------------------------------------------------------------------
 speaker:
   - platform: i2s_audio
@@ -124,11 +124,11 @@ microphone:
   - platform: i2s_audio
     id: my_mic
     i2s_audio_id: i2s_bus
-    i2s_din_pin: GPIO11 # Das Onboard-Mikrofon
+    i2s_din_pin: GPIO11
     adc_type: external
     pdm: false
     bits_per_sample: 16bit
-    channel: left # Versuchen, den Signal-Fehler durch Kanal-Isolation zu beheben
+    channel: mono # Testweise zurück auf mono, da in v1.10 der Ramp-Counter kam
 
 # -------------------------------------------------------------------
 # VOICE ASSISTANT (Manual Trigger Only)
@@ -140,7 +140,7 @@ voice_assistant:
   use_wake_word: false
 
 # -------------------------------------------------------------------
-# VERSTÄRKER KONTROLLE (NS4150B)
+# VERSTÄRKER KONTROLLE
 # -------------------------------------------------------------------
 switch:
   - platform: gpio
@@ -150,7 +150,7 @@ switch:
     restore_mode: ALWAYS_ON
 
 # -------------------------------------------------------------------
-# MANUELLE KONTROLLEN (DEBUGGING)
+# MANUELLE KONTROLLEN
 # -------------------------------------------------------------------
 button:
   - platform: template
@@ -158,7 +158,6 @@ button:
     id: manual_va_start
     on_press:
       - voice_assistant.start:
-      - logger.log: "Manuelle Aktivierung des Voice Assistant angefordert"
 
   - platform: template
     name: "Manual Voice Assist Stop"
@@ -166,7 +165,6 @@ button:
     on_press:
       - voice_assistant.stop:
 
-# Status-Sensoren für Debugging
 text_sensor:
   - platform: template
     name: "Voice Assistant State"
