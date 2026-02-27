@@ -3,7 +3,7 @@ esphome:
   friendly_name: "ESP32-P4 Voice Satellite"
   project:
     name: "waveshare.esp32-p4-micro"
-    version: "1.4"
+    version: "1.5"
 
 esp32:
   board: esp32-p4-evboard
@@ -138,13 +138,13 @@ sensor:
     update_interval: 1s
 
 # -------------------------------------------------------------------
-# VOICE ASSISTANT (openWakeWord)
+# VOICE ASSISTANT (Manual Trigger Only)
 # -------------------------------------------------------------------
 voice_assistant:
   id: va
   microphone: my_mic
   speaker: announcement_spk_resampler 
-  use_wake_word: true
+  use_wake_word: false
 
 # -------------------------------------------------------------------
 # VERSTÄRKER KONTROLLE (NS4150B)
