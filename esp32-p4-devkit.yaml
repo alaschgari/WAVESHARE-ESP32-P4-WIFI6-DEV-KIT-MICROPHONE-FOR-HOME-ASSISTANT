@@ -122,8 +122,9 @@ microphone:
 voice_assistant:
   id: va
   microphone: my_mic
-  # WICHTIG: Muss auf den 'speaker' (Mixer) zeigen, nicht auf den 'media_player'
-  speaker: main_audio_mixer 
+  # WICHTIG: Point to the resampler, which IS a Speaker component
+  # and flows into the mixer.
+  speaker: announcement_spk_resampler 
   use_wake_word: true
 
 # -------------------------------------------------------------------
