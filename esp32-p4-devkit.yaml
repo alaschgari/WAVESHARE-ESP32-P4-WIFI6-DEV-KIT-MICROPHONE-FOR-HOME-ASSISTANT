@@ -5,8 +5,8 @@ esphome:
     name: "waveshare.esp32_p4_mic_ha"
     version: "2.0"
   platformio_options:
-    # Use Dual I/O mode for the 16MB flash on the P4 for better performance
-    board_build.flash_mode: dio
+    # Use standard flash mode for better compatibility
+    board_build.arduino.memory_type: dio_qspi 
   includes:
     # notification_pcm.h contains the binary PCM data for the notification 'pling'
     # This avoids using MP3/WAV decoders that would consume too much RAM (OOM)
@@ -36,12 +36,13 @@ esp32:
 logger:
   # Use the standard UART0 for serial logging
   hardware_uart: UART0
-  level: DEBUG
+  level: INFO # Reduced from DEBUG for stability
   logs:
-    # High-level logging for audio debugging
-    i2s_audio: DEBUG
-    i2s_audio.speaker: DEBUG
-    speaker: DEBUG
+    # Keep audio logs for now, but reduce everything else
+    i2s_audio: INFO
+    i2s_audio.speaker: INFO
+    speaker: INFO
+    micro_wake_word: INFO
     # Filter out noisy components once stable
     component: INFO
     ethernet: INFO
