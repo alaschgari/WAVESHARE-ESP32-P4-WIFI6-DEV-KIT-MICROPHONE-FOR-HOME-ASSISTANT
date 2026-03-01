@@ -1,15 +1,14 @@
+# --- USER CONFIGURATION ---
+# Only change these variables to match your local setup
+# --------------------------
+substitutions:
+  # Important: Set this to the IP Address of your Home Assistant server
+  # to allow the device to wake up sleeping network equipment (LAN/WiFi bridges)
+  ha_ip: !secret ha_ip_address
+
 esphome:
   name: esp32-p4-satellite
   friendly_name: "ESP32-P4 Voice Satellite"
-  
-  # --- USER CONFIGURATION ---
-  # Only change these variables to match your local setup
-  # --------------------------
-  substitutions:
-    # Important: Set this to the IP Address of your Home Assistant server
-    # to allow the device to wake up sleeping network equipment (LAN/WiFi bridges)
-    ha_ip: "192.168.178.26"
-    
   project:
     name: "waveshare.esp32_p4_mic_ha"
     version: "2.0"
