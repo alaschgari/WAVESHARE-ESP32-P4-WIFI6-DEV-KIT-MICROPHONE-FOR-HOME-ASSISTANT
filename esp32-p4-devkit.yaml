@@ -1,6 +1,15 @@
 esphome:
   name: esp32-p4-satellite
   friendly_name: "ESP32-P4 Voice Satellite"
+  
+  # --- USER CONFIGURATION ---
+  # Only change these variables to match your local setup
+  # --------------------------
+  substitutions:
+    # Important: Set this to the IP Address of your Home Assistant server
+    # to allow the device to wake up sleeping network equipment (LAN/WiFi bridges)
+    ha_ip: "192.168.178.26"
+    
   project:
     name: "waveshare.esp32_p4_mic_ha"
     version: "2.0"
@@ -183,7 +192,7 @@ micro_wake_word:
         int sock = ::socket(AF_INET, SOCK_DGRAM, IPPROTO_IP);
         if (sock >= 0) {
             struct sockaddr_in dest_addr;
-            dest_addr.sin_addr.s_addr = inet_addr("192.168.178.26");
+            dest_addr.sin_addr.s_addr = inet_addr("${ha_ip}");
             dest_addr.sin_family = AF_INET;
             dest_addr.sin_port = htons(9);
             const char* payload = "WAKEUP!";
