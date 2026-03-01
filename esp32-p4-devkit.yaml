@@ -5,6 +5,10 @@ substitutions:
   # Important: Set this to the IP Address of your Home Assistant server
   # to allow the device to wake up sleeping network equipment (LAN/WiFi bridges)
   ha_ip: !secret ha_ip_address
+  # Native API encryption key used by Home Assistant to communicate with this device
+  api_key: !secret encryption_key
+  # OTA (Over-The-Air) update password
+  ota_password: !secret wifi_password
 
 esphome:
   name: esp32-p4-satellite
@@ -59,6 +63,9 @@ globals:
   - id: has_tts_response
     type: bool
     initial_value: 'false'
+  - id: tts_streaming
+    type: bool
+    initial_value: 'false'
 
 # -------------------------------------------------------------------
 # NETWORK CONNECTIVITY (Ethernet)
@@ -77,7 +84,7 @@ ethernet:
 
 api:
   encryption:
-    key: !secret encryption_key
+    key: ${api_key}
   on_client_connected:
     - logger.log: "Home Assistant API connected!"
     # Start Wake Word detection once HA is connected and ready
@@ -94,7 +101,7 @@ api:
 
 ota:
   - platform: esphome
-    password: !secret wifi_password
+    password: ${ota_password}
 
 # -------------------------------------------------------------------
 # I2C & AUDIO CODEC (ES8311)
@@ -277,6 +284,9 @@ voice_assistant:
         id(va_state).publish_state("Recognized: " + x);
 
   on_tts_start:
+    - globals.set:
+        id: has_tts_response
+        value: 'true'
     - logger.log:
         level: WARN
         format: "VA TTS: %s"
@@ -291,18 +301,16 @@ voice_assistant:
 
   on_tts_stream_start:
     - globals.set:
-        id: has_tts_response
+        id: tts_streaming
         value: 'true'
     # CRITICAL FALLBACK: Ensure the wake word model releases its lock BEFORE the speaker stream starts!
     # Without this, the speaker might crash with "Parent I2S bus not free"
     - micro_wake_word.stop:
     - lambda: 'id(my_mic).stop();'
-    # Send a tiny silent primer to wake up the DAC and amplifier
-    # This ensures no syllables are cut off while hardware powers up
+    # Send a tiny silent primer to wake up the DAC and amplifier smoothly into the queue
     - lambda: |-
         std::vector<uint8_t> primer(3200, 0);
         id(announcement_spk_resampler).play(primer.data(), primer.size());
-    - delay: 300ms
     - logger.log:
         level: WARN
         format: "VA: Audio stream starting..."
@@ -310,6 +318,9 @@ voice_assistant:
         id(va_state).publish_state("Playing Audio...");
 
   on_tts_stream_end:
+    - globals.set:
+        id: tts_streaming
+        value: 'false'
     - logger.log:
         level: WARN
         format: "VA: Audio stream finished"
@@ -344,17 +355,19 @@ script:
           condition:
             lambda: 'return id(has_tts_response);'
           then:
+            # Wait for the network stream to officially open (timeout 5s in case of error)
             - wait_until:
-                timeout: 2s
+                timeout: 5s
                 condition:
-                  lambda: 'return id(i2s_speaker_out).is_running();'
+                  lambda: 'return id(tts_streaming);'
             - logger.log:
                 level: WARN
-                format: "Speaker active, waiting for end..."
+                format: "Speaker active, waiting for stream to finish..."
+            # Wait for the network stream to close AND the local buffer to fully drain playing
             - wait_until:
                 timeout: 60s
                 condition:
-                  lambda: 'return !id(i2s_speaker_out).is_running();'
+                  lambda: 'return !id(tts_streaming) && !id(i2s_speaker_out).is_running();'
       - logger.log:
           level: WARN
           format: "Speaker stopped, restarting Wake Word..."
